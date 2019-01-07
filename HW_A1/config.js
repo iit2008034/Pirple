@@ -1,6 +1,5 @@
 /*
  * Create and Export Configuration variables
- *
  */
 
 // Contaniner for all the environments
