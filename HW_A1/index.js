@@ -2,12 +2,13 @@
  * Primary File for the API
  */
 
- // Depedencies
+// Depedencies
 var http = require('http');
 var https = require('https');
 var url = require('url');
 var StringDecoder = require('string_decoder').StringDecoder;
 var config = require('./config');
+var handlers = require('./handlers');
 var fs = require('fs');
 
 // The server should respond to all the requests  with a string
@@ -21,6 +22,7 @@ httpServer.listen(config.httpPort,function(){
 });
 
 
+// Load SSL certificate and Key file for https support
 var httpsServerOptions = {
 	'key' : fs.readFileSync('./https/key.pem'),
 	'cert' : fs.readFileSync('./https/cert.pem')
@@ -31,7 +33,7 @@ var httpsServer = https.createServer(httpsServerOptions, function (req, res){
 	unifiedServer(req, res);
 });
 
-// Start the server, and have it listen on Configured port in config.js
+// Start the https server, and have it listen on Configured port in config.js
 httpsServer.listen(config.httpsPort,function(){
 	console.log("The server is listening on "+config.httpsPort+" port in "+config.envName+" mode" );
 
@@ -66,7 +68,7 @@ var unifiedServer = function(req, res){
 	req.on('end', function(){
 		buffer += decoder.end();
 
-		// chaose the handler this request should go to
+		// choose the handler this request should go to
 		// If Request not found, should go to notFound handler.
 		var chosenhandler = typeof(router[trimmedpath]) !== 'undefined'? router[trimmedpath] : handlers.notFound;
 
@@ -107,30 +109,7 @@ var unifiedServer = function(req, res){
 };
 
 
-
-//Define handlers
-var handlers = {};
-
-handlers.sample = function (data, callback){
-	callback(200,{'name':'Sample handler'});
-};
-
-handlers.hello = function (data, callback){
-	callback(200,{'Message':'Welcome to My First Assignment'});
-};
-
-handlers.ping = function (data, callback){
-	callback(200);
-};
-
-//Not Found handlers
-handlers.notFound = function(data, callback){
-	callback(404);
-};
-
 // Define a request router
 var router = {
-	'sample' : handlers.sample,
 	'hello' : handlers.hello,
-	'ping' : handlers.ping
 };
